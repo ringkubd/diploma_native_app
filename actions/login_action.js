@@ -3,10 +3,9 @@ import * as Device from 'expo-device';
 import {API_URL, DEV_API_URL} from "@env"
 
 const login = (email, password) => {
-    console.log(DEV_API_URL)
     return async dispatch => {
         const response = await fetch(
-            `${DEV_API_URL}/login`,
+            `${API_URL}/login`,
             {
                 method: 'POST',
                 headers: {
