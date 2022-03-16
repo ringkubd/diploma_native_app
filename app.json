@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "diploma_student_app",
-    "slug": "diploma_student_app",
+    "name": "Diploma Student",
+    "slug": "diploma-student",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -16,6 +16,16 @@
     "assetBundlePatterns": [
       "**/*"
     ],
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "The app accesses your photos to let you upload .",
+          "cameraPermission": "The app accesses your camera to let you share them with your friends.",
+          "microphonePermission": "The app accesses your microphone to let you share them with your friends."
+        }
+      ]
+    ],
     "ios": {
       "supportsTablet": true
     },
@@ -27,6 +37,7 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "description": ""
   }
 }
