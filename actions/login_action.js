@@ -9,7 +9,8 @@ const login = (email, password) => {
             {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                 },
                 body: JSON.stringify({
                     email: email,
@@ -20,7 +21,7 @@ const login = (email, password) => {
         );
         if (!response.ok) {
             const errorResData = await response.json();
-            const errorId = errorResData.error.message;
+            const errorId = errorResData.message;
             let message = 'Something went wrong!';
             if (errorId === 'EMAIL_NOT_FOUND') {
                 message = 'This email could not be found!';

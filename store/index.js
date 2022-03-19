@@ -1,11 +1,13 @@
 import {createStore, combineReducers, applyMiddleware} from 'redux';
 import authReducer from "../reducers/auth_reducer";
 import asyncFunctionMiddleware from "./asyncFunctionMiddleware";
+import LoadingReducer from "../reducers/LoadingReducer";
 const middlewareEnhancer = applyMiddleware(asyncFunctionMiddleware)
 
 const rootReducer = combineReducers(
     {
-        auth: authReducer
+        auth: authReducer,
+        loading: LoadingReducer
     }
 )
 

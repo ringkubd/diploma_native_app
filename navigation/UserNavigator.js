@@ -2,15 +2,12 @@ import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {TouchableOpacity, View, StyleSheet} from "react-native";
 import Home from "../screens/home";
 import {useCallback, useEffect, useState} from "react";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Result from "../screens/Result";
 import Login from "../screens/login";
 import {Button, Text} from 'react-native-paper';
-import { Menu } from 'react-native-paper';
 import AddResult from "../screens/AddResult";
-import title from "react-native-paper/src/components/Typography/Title";
-
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +15,16 @@ const Stack = createNativeStackNavigator();
 const UserNavigator = (props) => {
     const [login, setLogin] = useState(false)
     const user = useSelector((state) => state.auth)
+    const loadingState = useSelector((state) => state.loading);
+    const dispatch = useDispatch();
+
+        useCallback(async ()=>{
+            const user = await AsyncStorage.getItem('@diploma_user')
+            if (user.token !== ""){
+                setLogin(true)
+            }
+            return {}
+        }, [])
 
     useEffect(() => {
         if (user.token !== ""){
@@ -26,13 +33,6 @@ const UserNavigator = (props) => {
         return {}
     }, [user]);
 
-    useCallback(async ()=>{
-        const user = await AsyncStorage.getItem('@diploma_user')
-        if (user.token !== ""){
-            setLogin(true)
-        }
-        return {}
-    }, [])
 
     return (
         <Stack.Navigator screenOptions={{

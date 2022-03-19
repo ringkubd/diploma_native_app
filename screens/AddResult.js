@@ -15,32 +15,7 @@ import {Card} from "react-native-paper";
 import Colors from "../constants/Corols";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import ModalSelector from 'react-native-modal-selector';
-import * as ImagePicker from 'expo-image-picker';
 import PhotoPicker from "../components/lib/PhotoPicker";
-
-
-const formReducer = (state, action) => {
-    if (action.type === FORM_INPUT_UPDATE) {
-        const updatedValues = {
-            ...state.inputValues,
-            [action.input]: action.value
-        };
-        const updatedValidities = {
-            ...state.inputValidities,
-            [action.input]: action.isValid
-        };
-        let updatedFormIsValid = true;
-        for (const key in updatedValidities) {
-            updatedFormIsValid = updatedFormIsValid && updatedValidities[key];
-        }
-        return {
-            formIsValid: updatedFormIsValid,
-            inputValidities: updatedValidities,
-            inputValues: updatedValues
-        };
-    }
-    return state;
-};
 
 
 const AddResult = (props) => {
@@ -52,29 +27,20 @@ const AddResult = (props) => {
     const [results, setResults] = useState({
         semester : 1,
         student_id: student?.id,
-
+        attachment: image,
+        gpa: 0,
+        failed_in_subject: 0,
+        status: 'Passed',
+    });
+    const [resultsValidation, setResultsValidation] = useState({
+        semester : false,
+        attachment: false,
+        gpa: false,
+        failed_in_subject: false,
+        status: false,
     });
 
 
-    const [formState, dispatchFormState] = useReducer(formReducer, {
-        inputValues: {
-            student_id: '',
-            semester: '',
-            gpa: '',
-            status: '',
-            failed_in_subject: '',
-            attachment: '',
-        },
-        inputValidities: {
-            student_id: false,
-            semester: false,
-            gpa: false,
-            status: false,
-            failed_in_subject: false,
-            attachment: false,
-        },
-        formIsValid: false
-    });
     useEffect(() => {
         if (error) {
             Alert.alert('An Error Occurred!', error, [{ text: 'Okay' }]);
@@ -84,21 +50,43 @@ const AddResult = (props) => {
     useEffect(async () => {
         const user = JSON.parse(await AsyncStorage.getItem('@diploma_user') ?? "")
         if(user.token === "") props.navigation.navigate('Login')
-        if (user.student === null) Alert.alert("Please login as student.")
-        setStudent(user.student)
+        if (user.user.student === null) Alert.alert("Please login as student.")
+        setStudent(user.user.student )
+        setResults({
+            ...results,
+            student_id: user.user?.student?.id
+        })
     }, [])
 
 
-    const inputChangeHandler = useCallback((inputIdentifier, inputValue, inputValidity) => {
-            dispatchFormState({
-                type: FORM_INPUT_UPDATE,
-                value: inputValue,
-                isValid: inputValidity,
-                input: inputIdentifier
-            });
-        },
-        [dispatchFormState]
-    )
+    const inputChangeHandler = (key, value) => {
+        setResultsValidation({
+            ...resultsValidation,
+            [key] : value === "" ? true : false
+
+        })
+        setResults({
+            ...results, [key] : value
+        })
+    }
+
+    const onImageSelect = (base64Image) => {
+        setImage(base64Image)
+        setResults({
+            ...results,
+            attachment: base64Image
+        })
+        setResultsValidation({
+            ...resultsValidation,
+            attachment: base64Image === "" ? true : false
+
+        })
+    }
+
+    const onSubmitHandler = () => {
+
+    }
+
     return (
         <KeyboardAvoidingView
             behavior="padding"
@@ -110,6 +98,7 @@ const AddResult = (props) => {
                             <Text style={styles.label}>Semester</Text>
                             <ModalSelector
                                 initValue="Select Semester!"
+                                selectedKey={results.semester}
                                 data={[
                                     {key: 1, label: '1st semester'},
                                     {key: 2, label: '2nd semester'},
@@ -120,46 +109,64 @@ const AddResult = (props) => {
                                     {key: 7, label: '7th semester'},
                                     {key: 8, label: '8th semester'},
                                 ]}
+
                                 accessible={true}
                                 cancelButtonAccessibilityLabel="Cancel"
+                                onChange={(selected) => {inputChangeHandler('semester',selected.key)}}
                             />
+                            {
+                                resultsValidation.semester ? (<Text>Please select a semester.</Text>) : null
+                            }
                         </View>
                         <View style={styles.formControl}>
                             <Text style={styles.label}>GPA</Text>
                             <TextInput
                                 style={styles.input}
-                                value=""
+                                value={results.gpa}
                                 keyboardType="numeric"
-                                max={5}
+                                onChangeText={(text) => {inputChangeHandler('gpa',text)}}
+                                maxLength={4}
                                 min={0}
                             />
+                            {
+                                resultsValidation.semester ? (<Text>Please select a semester.</Text>) : null
+                            }
                         </View>
 
                         <View style={styles.formControl}>
                             <Text style={styles.label}>Status</Text>
                             <ModalSelector
                                 initValue="Select Status!"
+                                selectedKey={results.status}
                                 data={[
                                     {key: 'Passed', label: 'Passed'},
                                     {key: 'Referred', label: 'Referred'},
                                     {key: 'Dropout', label: 'Dropout'},
                                 ]}
                                 accessible={true}
+                                onChange={(selected) => {inputChangeHandler('status',selected.key)}}
                                 cancelButtonAccessibilityLabel="Cancel"
                             />
+                            {
+                                resultsValidation.status && (<Text>Please select a Status.</Text>)
+                            }
                         </View>
 
                         <View style={styles.formControl}>
                             <Text style={styles.label}>Failed in Subject</Text>
                             <TextInput
                                 style={styles.input}
-                                value=""
+                                value={results.failed_in_subject.toString()}
                                 keyboardType="numeric"
+                                onChangeText={(text) => {inputChangeHandler('failed_in_subject',text)}}
                             />
                         </View>
                         <View style={styles.formControl}>
                             <Text style={styles.label}>Mark/Result Sheet</Text>
-                            <PhotoPicker />
+                            <PhotoPicker onImageSelect={onImageSelect} image={results.attachment} />
+                            {
+                                resultsValidation.attachment && (<Text>Please upload valid image.</Text>)
+                            }
                         </View>
 
                         <View style={styles.buttonContainer}>

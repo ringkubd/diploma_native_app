@@ -33,7 +33,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/isdbbisew.png",
         "backgroundColor": "#FFFFFF"
-      }
+      },
+      "package": "com.ringkubd.diplomastudent"
     },
     "web": {
       "favicon": "./assets/isdbbisew.png"

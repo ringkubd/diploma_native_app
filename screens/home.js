@@ -10,7 +10,6 @@ const Home = (props) => {
     useEffect(() => {
         if (user.token !== ""){
             setLoggedUser(user.user)
-            console.log(user)
         }
     }, [user]);
 

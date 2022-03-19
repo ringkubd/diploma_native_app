@@ -1,11 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import {View, StyleSheet, Text, Image, TouchableOpacity, Modal, Alert, Button} from "react-native";
-import {useSelector} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import { getResult } from '../services/result_service'
 import {DataTable} from "react-native-paper";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {API_BASE} from "@env"
 import ImageView from "react-native-image-viewing";
+import {LOADING, LOADING_DONE} from "../constants/Common";
 
 const attachmentImages = (attachment) => {
     let images = []
@@ -20,27 +21,39 @@ const attachmentImages = (attachment) => {
 }
 
 const Result = (props) => {
-    const user = useSelector((state) => state.auth)
-    const [localUser, setLocalUser] = useState({})
-    const [token, setToken] = useState("")
-    const [results, setResults] = useState("")
-    const [visible, setIsVisible] = useState(false);
+    const user = useSelector((state) => state.auth);
+    const [token, setToken] = useState("");
+    const [results, setResults] = useState("");
+    const [loading, setLoading] = useState(true);
     const [modelVisible, setModelVisible] = useState(false);
+    const dispatch = useDispatch();
 
 
     useEffect(async () => {
+        let cancel = false;
         const user = JSON.parse(await AsyncStorage.getItem('@diploma_user') ?? "")
         if (user.student === null) Alert.alert("Please login as student.")
         if (user.token !== "") {
             setToken(user.token)
         }
+        return  () => {
+            cancel = true;
+        }
     }, [user])
 
-    useEffect(async ()=> {
+    useEffect( async () => {
+        let cancel = false;
         if (token !== "") {
+            dispatch({type: LOADING})
             await getResult(token).then((r) => {
+                if (cancel) return;
                 setResults(r.data)
+                setLoading(false)
+                dispatch({type: LOADING_DONE})
             })
+        }
+        return  () => {
+            cancel = true;
         }
     }, [token])
 
@@ -59,8 +72,8 @@ const Result = (props) => {
                     <DataTable.Title>Attach</DataTable.Title>
                 </DataTable.Header>
                 {
-                    results.length > 0 &&
-                    results.map((result) => {
+                    results?.length > 0 &&
+                    results?.map((result) => {
                         return (
                             <DataTable.Row key={result.id}>
                                 <DataTable.Cell>{result.semester}</DataTable.Cell>
